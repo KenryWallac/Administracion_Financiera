@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KW - Administración Financiera</title>
+
+  <!-- ═══════════════════════════════════════════
+       LIBRERÍAS EXTERNAS (via CDN)
+       - SheetJS: exportar a Excel (.xlsx)
+       - jsPDF + AutoTable: exportar a PDF
+       - Google Fonts: tipografía
+  ════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR DE NAVEGACIÓN
+       Navegación principal entre secciones de la app
+  ════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">◈</span>
+      <span class="logo-text">Ing. Wallace</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-section="dashboard" onclick="showSection('dashboard')">
+        <span class="nav-icon">▦</span>
+        <span>Panel</span>
+      </button>
+      <button class="nav-btn" data-section="movimientos" onclick="showSection('movimientos')">
+        <span class="nav-icon">⇌</span>
+        <span>Movimientos</span>
+      </button>
+      <button class="nav-btn" data-section="cuentas" onclick="showSection('cuentas')">
+        <span class="nav-icon">◫</span>
+        <span>Cuentas</span>
+      </button>
+      <button class="nav-btn" data-section="correos" onclick="showSection('correos')">
+        <span class="nav-icon">✉</span>
+        <span>Correos</span>
+      </button>
+      <button class="nav-btn" data-section="reportes" onclick="showSection('reportes')">
+        <span class="nav-icon">◈</span>
+        <span>Reportes</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="version-tag">v1.0.0</span>
+    </div>
+  </aside>
+
+  <!-- Overlay para cerrar sidebar en móvil -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ═══════════════════════════════════════════
+       CONTENIDO PRINCIPAL
+  ════════════════════════════════════════════ -->
+  <main class="main-content">
+
+    <!-- Header superior -->
+    <header class="top-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+      <h1 class="page-title" id="pageTitle">Panel</h1>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modalMovimiento')">
+          + Movimiento
+        </button>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════
+         SECCIÓN: DASHBOARD / PANEL PRINCIPAL
+         Muestra resumen financiero y movimientos recientes
+    ════════════════════════════════════════════ -->
+    <section id="section-dashboard" class="section active">
+
+      <!-- Tarjetas de resumen -->
+      <div class="summary-grid">
+        <div class="summary-card card-balance">
+          <div class="card-label">Balance Total</div>
+          <div class="card-amount" id="totalBalance">$0.00</div>
+          <div class="card-sub" id="balanceSub">0 movimientos</div>
+        </div>
+        <div class="summary-card card-income">
+          <div class="card-label">Total Ingresos</div>
+          <div class="card-amount" id="totalIngresos">$0.00</div>
+          <div class="card-sub" id="ingresosSub">0 entradas</div>
+        </div>
+        <div class="summary-card card-expense">
+          <div class="card-label">Total Gastos</div>
+          <div class="card-amount" id="totalGastos">$0.00</div>
+          <div class="card-sub" id="gastosSub">0 salidas</div>
+        </div>
+      </div>
+
+      <!-- Movimientos recientes con filtros -->
+      <div class="panel-section">
+        <div class="panel-header">
+          <h2 class="panel-title">Movimientos Recientes</h2>
+          <button class="btn btn-ghost btn-sm" onclick="showSection('movimientos')">Ver todos →</button>
+        </div>
+
+        <!-- Filtros rápidos -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <label class="filter-label">Desde</label>
+            <input type="date" class="filter-input" id="filtroDesde" onchange="aplicarFiltros()">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Hasta</label>
+            <input type="date" class="filter-input" id="filtroHasta" onchange="aplicarFiltros()">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Tipo</label>
+            <select class="filter-input" id="filtroTipo" onchange="aplicarFiltros()">
+              <option value="">Todos</option>
+              <option value="ingreso">Ingresos</option>
+              <option value="gasto">Gastos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Cuenta</label>
+            <select class="filter-input" id="filtroCuenta" onchange="aplicarFiltros()">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="limpiarFiltros()">Limpiar</button>
+        </div>
+
+        <!-- Tabla de movimientos -->
+        <div class="table-wrapper">
+          <table class="data-table" id="tablaMovimientos">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Cuenta</th>
+                <th>Tipo</th>
+                <th class="text-right">Monto</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyMovimientos">
+              <!-- Los movimientos se renderizan dinámicamente con JS -->
+            </tbody>
+          </table>
+          <div class="empty-state" id="emptyMovimientos" style="display:none">
+            <div class="empty-icon">◈</div>
+            <p>No hay movimientos registrados</p>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modalMovimiento')">Agregar primero</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         SECCIÓN: MOVIMIENTOS (vista completa)
+    ════════════════════════════════════════════ -->
+    <section id="section-movimientos" class="section">
+      <div class="panel-section">
+        <div class="panel-header">
+          <h2 class="panel-title">Todos los Movimientos</h2>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalMovimiento')">+ Agregar</button>
+        </div>
+
+        <!-- Mismos filtros (sincronizados con el dashboard) -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <label class="filter-label">Desde</label>
+            <input type="date" class="filter-input" id="filtroDesde2" onchange="sincronizarFiltros(this,'filtroDesde')">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Hasta</label>
+            <input type="date" class="filter-input" id="filtroHasta2" onchange="sincronizarFiltros(this,'filtroHasta')">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Tipo</label>
+            <select class="filter-input" id="filtroTipo2" onchange="sincronizarFiltros(this,'filtroTipo')">
+              <option value="">Todos</option>
+              <option value="ingreso">Ingresos</option>
+              <option value="gasto">Gastos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Cuenta</label>
+            <select class="filter-input" id="filtroCuenta2" onchange="sincronizarFiltros(this,'filtroCuenta')">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="limpiarFiltros()">Limpiar</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Cuenta</th>
+                <th>Tipo</th>
+                <th class="text-right">Monto</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyMovimientos2">
+              <!-- Renderizado dinámicamente -->
+            </tbody>
+          </table>
+          <div class="empty-state" id="emptyMovimientos2" style="display:none">
+            <div class="empty-icon">◈</div>
+            <p>No hay movimientos para mostrar</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         SECCIÓN: CUENTAS / REFERENTES BANCARIOS
+         Crear etiquetas de cuentas para asociar movimientos
+    ════════════════════════════════════════════ -->
+    <section id="section-cuentas" class="section">
+      <div class="panel-section">
+        <div class="panel-header">
+          <h2 class="panel-title">Referentes de Cuenta</h2>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalCuenta')">+ Nueva Cuenta</button>
+        </div>
+
+        <p class="section-desc">
+          Los referentes son etiquetas para identificar tus cuentas. No guardamos datos bancarios reales.
+        </p>
+
+        <div class="cuentas-grid" id="cuentasGrid">
+          <!-- Tarjetas de cuentas renderizadas con JS -->
+        </div>
+
+        <div class="empty-state" id="emptyCuentas" style="display:none">
+          <div class="empty-icon">◫</div>
+          <p>No tienes referentes de cuenta</p>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalCuenta')">Crear primero</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         SECCIÓN: CORREOS / IMPORTACIÓN SIMULADA
+         Simula detección de notificaciones bancarias
+    ════════════════════════════════════════════ -->
+    <section id="section-correos" class="section">
+      <div class="panel-section">
+        <div class="panel-header">
+          <h2 class="panel-title">Importar desde Correo</h2>
+        </div>
+
+        <!-- Explicación de la funcionalidad -->
+        <div class="info-box">
+          <div class="info-icon">ℹ</div>
+          <div class="info-content">
+            <strong>¿Cómo funciona?</strong>
+            <p>
+              Por seguridad, los navegadores no pueden acceder directamente a tu correo.
+              Aquí puedes <strong>pegar el texto</strong> de un correo de notificación bancaria
+              o <strong>cargar un archivo JSON</strong> con varios correos.
+              La app detectará automáticamente montos, fechas y tipos.
+            </p>
+            <p class="info-note">
+              💡 Para integración real con Gmail/Outlook, se requiere un backend Node.js + OAuth2.
+              Consulta el archivo <code>server.js</code> incluido como plantilla.
+            </p>
+          </div>
+        </div>
+
+        <!-- Patrones de detección configurables -->
+        <div class="panel-sub-section">
+          <h3 class="sub-title">Patrones de Detección</h3>
+          <div class="patterns-grid" id="patternsGrid">
+            <!-- Renderizado con JS -->
+          </div>
+          <button class="btn btn-ghost btn-sm mt-sm" onclick="openModal('modalPatron')">+ Agregar patrón</button>
+        </div>
+
+        <!-- Área para pegar correo -->
+        <div class="panel-sub-section">
+          <h3 class="sub-title">Pegar Texto de Correo</h3>
+          <textarea
+            id="emailText"
+            class="email-textarea"
+            placeholder="Pega aquí el contenido de un correo de notificación bancaria...
+Ejemplo:
+  Estimado cliente, se realizó un cargo de $1,250.00 en su cuenta el 15/01/2025."
+            rows="6"
+          ></textarea>
+          <div class="btn-row">
+            <select class="filter-input" id="emailCuentaAsoc" style="flex:1">
+              <option value="">Seleccionar cuenta asociada</option>
+            </select>
+            <button class="btn btn-primary" onclick="procesarCorreo()">Analizar Correo</button>
+          </div>
+        </div>
+
+        <!-- Importar JSON de correos -->
+        <div class="panel-sub-section">
+          <h3 class="sub-title">Importar Archivo JSON</h3>
+          <p class="section-desc">Formato esperado: array de objetos con campos <code>asunto</code>, <code>cuerpo</code>, <code>fecha</code>.</p>
+          <label class="file-upload-label">
+            <input type="file" accept=".json" id="jsonEmailFile" onchange="importarJSON(event)" style="display:none">
+            <span class="file-upload-btn">📂 Seleccionar archivo JSON</span>
+          </label>
+        </div>
+
+        <!-- Resultados del análisis -->
+        <div class="panel-sub-section" id="emailResultados" style="display:none">
+          <h3 class="sub-title">Movimientos Detectados</h3>
+          <div id="emailResultadosLista"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         SECCIÓN: REPORTES Y EXPORTACIÓN
+    ════════════════════════════════════════════ -->
+    <section id="section-reportes" class="section">
+      <div class="panel-section">
+        <div class="panel-header">
+          <h2 class="panel-title">Reportes y Exportación</h2>
+        </div>
+
+        <!-- Resumen por cuenta -->
+        <div class="panel-sub-section">
+          <h3 class="sub-title">Resumen por Cuenta</h3>
+          <div class="table-wrapper">
+            <table class="data-table" id="tablaCuentasResumen">
+              <thead>
+                <tr>
+                  <th>Cuenta</th>
+                  <th class="text-right">Ingresos</th>
+                  <th class="text-right">Gastos</th>
+                  <th class="text-right">Balance</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyCuentasResumen"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Resumen por categoría -->
+        <div class="panel-sub-section">
+          <h3 class="sub-title">Resumen por Categoría</h3>
+          <div class="table-wrapper">
+            <table class="data-table" id="tablaCatResumen">
+              <thead>
+                <tr>
+                  <th>Categoría</th>
+                  <th>Tipo</th>
+                  <th class="text-right">Total</th>
+                  <th class="text-right">Movimientos</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyCatResumen"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Botones de exportación -->
+        <div class="export-grid">
+          <button class="export-card" onclick="exportarExcel()">
+            <span class="export-icon">📊</span>
+            <span class="export-title">Exportar Excel</span>
+            <span class="export-desc">Movimientos completos en formato .xlsx</span>
+          </button>
+          <button class="export-card" onclick="exportarPDF()">
+            <span class="export-icon">📄</span>
+            <span class="export-title">Exportar PDF</span>
+            <span class="export-desc">Reporte con resumen y tabla de movimientos</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- /main-content -->
+
+  <!-- ═══════════════════════════════════════════
+       MODALES
+       Formularios emergentes para agregar/editar datos
+  ════════════════════════════════════════════ -->
+
+  <!-- Modal: Agregar / Editar Movimiento -->
+  <div class="modal-overlay" id="modalMovimiento" onclick="closeModalOutside(event, 'modalMovimiento')">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalMovTitle">Nuevo Movimiento</h3>
+        <button class="modal-close" onclick="closeModal('modalMovimiento')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="movId">
+
+        <!-- Tipo de movimiento (ingreso / gasto) -->
+        <div class="type-toggle">
+          <button class="type-btn active" id="btnIngreso" onclick="setTipo('ingreso')">↑ Ingreso</button>
+          <button class="type-btn" id="btnGasto" onclick="setTipo('gasto')">↓ Gasto</button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Monto *</label>
+            <input type="number" class="form-input" id="movMonto" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha *</label>
+            <input type="date" class="form-input" id="movFecha">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descripción *</label>
+          <input type="text" class="form-input" id="movDescripcion" placeholder="Ej: Supermercado, Nómina enero...">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Categoría *</label>
+            <select class="form-input" id="movCategoria">
+              <!-- Opciones cargadas dinámicamente según tipo -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cuenta / Banco</label>
+            <select class="form-input" id="movCuenta">
+              <option value="">Sin especificar</option>
+              <!-- Opciones de cuentas cargadas con JS -->
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modalMovimiento')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarMovimiento()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Nueva Cuenta / Referente -->
+  <div class="modal-overlay" id="modalCuenta" onclick="closeModalOutside(event, 'modalCuenta')">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalCuentaTitle">Nueva Cuenta Referente</h3>
+        <button class="modal-close" onclick="closeModal('modalCuenta')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="cuentaId">
+
+        <div class="form-group">
+          <label class="form-label">Nombre del referente *</label>
+          <input type="text" class="form-input" id="cuentaNombre" placeholder="Ej: Banco Nacional - Cuenta Nómina">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tipo de cuenta</label>
+            <select class="form-input" id="cuentaTipo">
+              <option value="banco">Banco</option>
+              <option value="tarjeta">Tarjeta de Crédito</option>
+              <option value="ahorro">Cuenta de Ahorro</option>
+              <option value="efectivo">Efectivo</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Color</label>
+            <input type="color" class="form-input color-input" id="cuentaColor" value="#6366f1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notas (opcional)</label>
+          <input type="text" class="form-input" id="cuentaNotas" placeholder="Referencia, última actualización, etc.">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modalCuenta')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarCuenta()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Agregar Patrón de Detección de Correo -->
+  <div class="modal-overlay" id="modalPatron" onclick="closeModalOutside(event, 'modalPatron')">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Nuevo Patrón de Detección</h3>
+        <button class="modal-close" onclick="closeModal('modalPatron')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="section-desc">
+          Define palabras clave que la app buscará en el texto del correo para identificar el tipo de movimiento.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Nombre del patrón *</label>
+          <input type="text" class="form-input" id="patronNombre" placeholder="Ej: Cargo Banco X">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tipo detectado *</label>
+            <select class="form-input" id="patronTipo">
+              <option value="gasto">Gasto</option>
+              <option value="ingreso">Ingreso</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Categoría automática</label>
+            <select class="form-input" id="patronCategoria">
+              <!-- Cargado dinámicamente -->
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Palabras clave (separadas por coma) *</label>
+          <input type="text" class="form-input" id="patronKeywords" placeholder="cargo, débito, se realizó un pago">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expresión regular para el monto (opcional)</label>
+          <input type="text" class="form-input" id="patronRegex" placeholder="\\$([\\d,]+\\.\\d{2})">
+          <span class="form-hint">Si se deja vacío, se usará el patrón por defecto: $X,XXX.XX</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modalPatron')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarPatron()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmar eliminación -->
+  <div class="modal-overlay" id="modalConfirm" onclick="closeModalOutside(event, 'modalConfirm')">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirmar eliminación</h3>
+        <button class="modal-close" onclick="closeModal('modalConfirm')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">¿Estás seguro de que deseas eliminar este elemento?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modalConfirm')">Cancelar</button>
+        <button class="btn btn-danger" id="confirmBtn">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de notificaciones -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

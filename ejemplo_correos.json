@@ -1,0 +1,22 @@
+[
+  {
+    "asunto": "Notificación de cargo - Banco Nacional",
+    "cuerpo": "Estimado cliente, se realizó un cargo de $1,250.00 en su cuenta el día de hoy. Concepto: Supermercado La Sirena.",
+    "fecha": "2025-01-15"
+  },
+  {
+    "asunto": "Depósito recibido - Banco Nacional",
+    "cuerpo": "Se realizó un depósito por $45,000.00 a su cuenta. Concepto: Nómina enero 2025.",
+    "fecha": "2025-01-01"
+  },
+  {
+    "asunto": "Alerta de pago - Tarjeta Visa",
+    "cuerpo": "Se realizó un pago con su tarjeta por $3,500.00 en Netflix y servicios de streaming.",
+    "fecha": "2025-01-10"
+  },
+  {
+    "asunto": "Transferencia recibida",
+    "cuerpo": "Ha recibido una transferencia por $8,000.00 de parte de Juan Pérez. Su saldo ha sido actualizado.",
+    "fecha": "2025-01-12"
+  }
+]
