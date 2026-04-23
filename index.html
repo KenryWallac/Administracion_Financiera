@@ -55,20 +55,20 @@
         <span>Reportes</span>
       </button>
     </nav>
-
+ 
     <div class="sidebar-footer">
       <span class="version-tag">v1.0.0</span>
     </div>
   </aside>
-
+ 
   <!-- Overlay para cerrar sidebar en móvil -->
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-
+ 
   <!-- ═══════════════════════════════════════════
        CONTENIDO PRINCIPAL
   ════════════════════════════════════════════ -->
   <main class="main-content">
-
+ 
     <!-- Header superior -->
     <header class="top-header">
       <button class="menu-toggle" onclick="toggleSidebar()">
@@ -81,13 +81,13 @@
         </button>
       </div>
     </header>
-
+ 
     <!-- ═══════════════════════════════════════════
          SECCIÓN: DASHBOARD / PANEL PRINCIPAL
          Muestra resumen financiero y movimientos recientes
     ════════════════════════════════════════════ -->
     <section id="section-dashboard" class="section active">
-
+ 
       <!-- Tarjetas de resumen -->
       <div class="summary-grid">
         <div class="summary-card card-balance">
@@ -106,14 +106,14 @@
           <div class="card-sub" id="gastosSub">0 salidas</div>
         </div>
       </div>
-
+ 
       <!-- Movimientos recientes con filtros -->
       <div class="panel-section">
         <div class="panel-header">
           <h2 class="panel-title">Movimientos Recientes</h2>
           <button class="btn btn-ghost btn-sm" onclick="showSection('movimientos')">Ver todos →</button>
         </div>
-
+ 
         <!-- Filtros rápidos -->
         <div class="filters-bar">
           <div class="filter-group">
@@ -140,7 +140,7 @@
           </div>
           <button class="btn btn-ghost btn-sm" onclick="limpiarFiltros()">Limpiar</button>
         </div>
-
+ 
         <!-- Tabla de movimientos -->
         <div class="table-wrapper">
           <table class="data-table" id="tablaMovimientos">
@@ -167,7 +167,7 @@
         </div>
       </div>
     </section>
-
+ 
     <!-- ═══════════════════════════════════════════
          SECCIÓN: MOVIMIENTOS (vista completa)
     ════════════════════════════════════════════ -->
@@ -177,7 +177,7 @@
           <h2 class="panel-title">Todos los Movimientos</h2>
           <button class="btn btn-primary btn-sm" onclick="openModal('modalMovimiento')">+ Agregar</button>
         </div>
-
+ 
         <!-- Mismos filtros (sincronizados con el dashboard) -->
         <div class="filters-bar">
           <div class="filter-group">
@@ -204,7 +204,7 @@
           </div>
           <button class="btn btn-ghost btn-sm" onclick="limpiarFiltros()">Limpiar</button>
         </div>
-
+ 
         <div class="table-wrapper">
           <table class="data-table">
             <thead>
@@ -229,7 +229,7 @@
         </div>
       </div>
     </section>
-
+ 
     <!-- ═══════════════════════════════════════════
          SECCIÓN: CUENTAS / REFERENTES BANCARIOS
          Crear etiquetas de cuentas para asociar movimientos
@@ -240,15 +240,15 @@
           <h2 class="panel-title">Referentes de Cuenta</h2>
           <button class="btn btn-primary btn-sm" onclick="openModal('modalCuenta')">+ Nueva Cuenta</button>
         </div>
-
+ 
         <p class="section-desc">
           Los referentes son etiquetas para identificar tus cuentas. No guardamos datos bancarios reales.
         </p>
-
+ 
         <div class="cuentas-grid" id="cuentasGrid">
           <!-- Tarjetas de cuentas renderizadas con JS -->
         </div>
-
+ 
         <div class="empty-state" id="emptyCuentas" style="display:none">
           <div class="empty-icon">◫</div>
           <p>No tienes referentes de cuenta</p>
@@ -256,7 +256,7 @@
         </div>
       </div>
     </section>
-
+ 
     <!-- ═══════════════════════════════════════════
          SECCIÓN: CORREOS / IMPORTACIÓN SIMULADA
          Simula detección de notificaciones bancarias
@@ -266,7 +266,7 @@
         <div class="panel-header">
           <h2 class="panel-title">Importar desde Correo</h2>
         </div>
-
+ 
         <!-- Explicación de la funcionalidad -->
         <div class="info-box">
           <div class="info-icon">ℹ</div>
@@ -284,7 +284,7 @@
             </p>
           </div>
         </div>
-
+ 
         <!-- Patrones de detección configurables -->
         <div class="panel-sub-section">
           <h3 class="sub-title">Patrones de Detección</h3>
@@ -293,7 +293,7 @@
           </div>
           <button class="btn btn-ghost btn-sm mt-sm" onclick="openModal('modalPatron')">+ Agregar patrón</button>
         </div>
-
+ 
         <!-- Área para pegar correo -->
         <div class="panel-sub-section">
           <h3 class="sub-title">Pegar Texto de Correo</h3>
@@ -312,7 +312,7 @@ Ejemplo:
             <button class="btn btn-primary" onclick="procesarCorreo()">Analizar Correo</button>
           </div>
         </div>
-
+ 
         <!-- Importar JSON de correos -->
         <div class="panel-sub-section">
           <h3 class="sub-title">Importar Archivo JSON</h3>
@@ -322,7 +322,7 @@ Ejemplo:
             <span class="file-upload-btn">📂 Seleccionar archivo JSON</span>
           </label>
         </div>
-
+ 
         <!-- Resultados del análisis -->
         <div class="panel-sub-section" id="emailResultados" style="display:none">
           <h3 class="sub-title">Movimientos Detectados</h3>
@@ -330,7 +330,7 @@ Ejemplo:
         </div>
       </div>
     </section>
-
+ 
     <!-- ═══════════════════════════════════════════
          SECCIÓN: REPORTES Y EXPORTACIÓN
     ════════════════════════════════════════════ -->
@@ -339,7 +339,7 @@ Ejemplo:
         <div class="panel-header">
           <h2 class="panel-title">Reportes y Exportación</h2>
         </div>
-
+ 
         <!-- Resumen por cuenta -->
         <div class="panel-sub-section">
           <h3 class="sub-title">Resumen por Cuenta</h3>
@@ -357,7 +357,7 @@ Ejemplo:
             </table>
           </div>
         </div>
-
+ 
         <!-- Resumen por categoría -->
         <div class="panel-sub-section">
           <h3 class="sub-title">Resumen por Categoría</h3>
@@ -375,7 +375,7 @@ Ejemplo:
             </table>
           </div>
         </div>
-
+ 
         <!-- Botones de exportación -->
         <div class="export-grid">
           <button class="export-card" onclick="exportarExcel()">
@@ -391,14 +391,14 @@ Ejemplo:
         </div>
       </div>
     </section>
-
+ 
   </main><!-- /main-content -->
-
+ 
   <!-- ═══════════════════════════════════════════
        MODALES
        Formularios emergentes para agregar/editar datos
   ════════════════════════════════════════════ -->
-
+ 
   <!-- Modal: Agregar / Editar Movimiento -->
   <div class="modal-overlay" id="modalMovimiento" onclick="closeModalOutside(event, 'modalMovimiento')">
     <div class="modal">
@@ -408,13 +408,14 @@ Ejemplo:
       </div>
       <div class="modal-body">
         <input type="hidden" id="movId">
-
-        <!-- Tipo de movimiento (ingreso / gasto) -->
+ 
+        <!-- Tipo de movimiento (ingreso / gasto / transferencia) -->
         <div class="type-toggle">
           <button class="type-btn active" id="btnIngreso" onclick="setTipo('ingreso')">↑ Ingreso</button>
           <button class="type-btn" id="btnGasto" onclick="setTipo('gasto')">↓ Gasto</button>
+          <button class="type-btn" id="btnTransferencia" onclick="setTipo('transferencia')">⇄ Transferencia</button>
         </div>
-
+ 
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Monto *</label>
@@ -425,12 +426,12 @@ Ejemplo:
             <input type="date" class="form-input" id="movFecha">
           </div>
         </div>
-
+ 
         <div class="form-group">
           <label class="form-label">Descripción *</label>
           <input type="text" class="form-input" id="movDescripcion" placeholder="Ej: Supermercado, Nómina enero...">
         </div>
-
+ 
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Categoría *</label>
@@ -439,11 +440,24 @@ Ejemplo:
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Cuenta / Banco</label>
+            <label class="form-label">Cuenta origen</label>
             <select class="form-input" id="movCuenta">
               <option value="">Sin especificar</option>
               <!-- Opciones de cuentas cargadas con JS -->
             </select>
+          </div>
+        </div>
+ 
+        <!-- Campo de cuenta destino: solo visible cuando tipo = transferencia -->
+        <div class="form-row" id="rowCuentaDestino" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Cuenta destino *</label>
+            <select class="form-input" id="movCuentaDestino">
+              <option value="">Seleccionar destino</option>
+            </select>
+          </div>
+          <div class="form-group" style="justify-content:flex-end;padding-top:1.5rem">
+            <span class="transfer-hint">El monto saldrá de la cuenta origen y entrará en la cuenta destino. No afecta ingresos ni gastos totales.</span>
           </div>
         </div>
       </div>
@@ -453,7 +467,7 @@ Ejemplo:
       </div>
     </div>
   </div>
-
+ 
   <!-- Modal: Nueva Cuenta / Referente -->
   <div class="modal-overlay" id="modalCuenta" onclick="closeModalOutside(event, 'modalCuenta')">
     <div class="modal">
@@ -463,12 +477,12 @@ Ejemplo:
       </div>
       <div class="modal-body">
         <input type="hidden" id="cuentaId">
-
+ 
         <div class="form-group">
           <label class="form-label">Nombre del referente *</label>
           <input type="text" class="form-input" id="cuentaNombre" placeholder="Ej: Banco Nacional - Cuenta Nómina">
         </div>
-
+ 
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Tipo de cuenta</label>
@@ -485,7 +499,7 @@ Ejemplo:
             <input type="color" class="form-input color-input" id="cuentaColor" value="#6366f1">
           </div>
         </div>
-
+ 
         <div class="form-group">
           <label class="form-label">Notas (opcional)</label>
           <input type="text" class="form-input" id="cuentaNotas" placeholder="Referencia, última actualización, etc.">
@@ -497,7 +511,7 @@ Ejemplo:
       </div>
     </div>
   </div>
-
+ 
   <!-- Modal: Agregar Patrón de Detección de Correo -->
   <div class="modal-overlay" id="modalPatron" onclick="closeModalOutside(event, 'modalPatron')">
     <div class="modal">
@@ -544,7 +558,7 @@ Ejemplo:
       </div>
     </div>
   </div>
-
+ 
   <!-- Modal: Confirmar eliminación -->
   <div class="modal-overlay" id="modalConfirm" onclick="closeModalOutside(event, 'modalConfirm')">
     <div class="modal modal-sm">
@@ -561,10 +575,11 @@ Ejemplo:
       </div>
     </div>
   </div>
-
+ 
   <!-- Toast de notificaciones -->
   <div class="toast-container" id="toastContainer"></div>
-
+ 
   <script src="script.js"></script>
 </body>
 </html>
+ 

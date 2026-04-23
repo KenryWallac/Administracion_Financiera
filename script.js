@@ -63,6 +63,12 @@ const CATEGORIAS = {
     'Seguros',
     'Suscripciones',
     'Otros gastos'
+  ],
+  // Las transferencias entre cuentas propias NO son ingreso ni gasto.
+  // Se registran como par (salida + entrada) pero se EXCLUYEN del cálculo
+  // de totales para no inflar los números.
+  transferencia: [
+    'Transferencia entre cuentas'
   ]
 };
 
@@ -295,18 +301,29 @@ function showToast(mensaje, tipo = 'info', duracion = 3000) {
 ═══════════════════════════════════════════════════════════════ */
 
 /**
- * Configura el tipo de movimiento en el formulario (ingreso/gasto)
- * Actualiza los botones toggle y recarga las categorías
+ * Configura el tipo de movimiento en el formulario (ingreso/gasto/transferencia)
+ * Actualiza los botones toggle y recarga las categorías.
+ * Las transferencias muestran además el campo de cuenta destino.
  */
 function setTipo(tipo) {
   App.tipoActual = tipo;
 
-  // Actualizar estado visual de los botones
+  // Actualizar estado visual de los tres botones
   document.getElementById('btnIngreso').classList.toggle('active', tipo === 'ingreso');
   document.getElementById('btnGasto').classList.toggle('active', tipo === 'gasto');
+  document.getElementById('btnTransferencia').classList.toggle('active', tipo === 'transferencia');
 
-  // Recargar categorías según el tipo
-  cargarCategoriasEnSelect('movCategoria', tipo);
+  // Mostrar / ocultar campo de cuenta destino (solo en transferencia)
+  const rowDestino = document.getElementById('rowCuentaDestino');
+  if (rowDestino) rowDestino.style.display = tipo === 'transferencia' ? 'flex' : 'none';
+
+  // Cargar categorías según tipo
+  if (tipo === 'transferencia') {
+    const sel = document.getElementById('movCategoria');
+    if (sel) sel.innerHTML = '<option value="Transferencia entre cuentas">Transferencia entre cuentas</option>';
+  } else {
+    cargarCategoriasEnSelect('movCategoria', tipo);
+  }
 }
 
 /** Carga las categorías disponibles en un elemento <select> */
@@ -387,8 +404,11 @@ function editarMovimiento(id) {
 }
 
 /**
- * Valida y guarda un movimiento (nuevo o editado)
- * Actualiza localStorage y recalcula el balance
+ * Valida y guarda un movimiento (nuevo o editado).
+ * Si el tipo es 'transferencia', crea DOS movimientos vinculados:
+ *   - Salida de la cuenta origen
+ *   - Entrada en la cuenta destino
+ * Ambos quedan excluidos del cálculo de ingresos/gastos totales.
  */
 function guardarMovimiento() {
   // ─── Obtener valores del formulario ───
@@ -408,6 +428,53 @@ function guardarMovimiento() {
   }
   if (isNaN(monto) || monto <= 0) {
     showToast('El monto debe ser un número positivo.', 'error'); return;
+  }
+
+  // ─── Validación extra para transferencias ───
+  if (tipo === 'transferencia') {
+    const cuentaDestinoId = document.getElementById('movCuentaDestino')?.value || '';
+    if (!cuentaId) {
+      showToast('Selecciona la cuenta origen de la transferencia.', 'error'); return;
+    }
+    if (!cuentaDestinoId) {
+      showToast('Selecciona la cuenta destino de la transferencia.', 'error'); return;
+    }
+    if (cuentaId === cuentaDestinoId) {
+      showToast('La cuenta origen y destino no pueden ser la misma.', 'error'); return;
+    }
+
+    // Generar un ID de vinculación para unir los dos movimientos
+    const vinculoId = generarId();
+
+    const salida = {
+      id:          generarId(),
+      tipo:        'transferencia',
+      subTipo:     'salida',           // identifica la "pata" de salida
+      vinculoId,                       // enlaza ambos registros
+      monto, fecha, descripcion,
+      categoria:   'Transferencia entre cuentas',
+      cuentaId,                        // cuenta origen
+      creadoEn:    new Date().toISOString()
+    };
+
+    const entrada = {
+      id:          generarId(),
+      tipo:        'transferencia',
+      subTipo:     'entrada',          // identifica la "pata" de entrada
+      vinculoId,
+      monto, fecha, descripcion,
+      categoria:   'Transferencia entre cuentas',
+      cuentaId:    cuentaDestinoId,    // cuenta destino
+      creadoEn:    new Date().toISOString()
+    };
+
+    App.movimientos.unshift(entrada);
+    App.movimientos.unshift(salida);
+    persistirMovimientos();
+    closeModal('modalMovimiento');
+    renderTodo();
+    showToast('Transferencia registrada en ambas cuentas', 'success');
+    return;
   }
 
   if (App.movimientoEditId) {
@@ -616,14 +683,35 @@ function getColorCuenta(cuentaId) {
  * @param {Object} mov - Objeto del movimiento
  */
 function renderFilaMovimiento(mov) {
-  const esIngreso = mov.tipo === 'ingreso';
-  const nombreCuenta = getNombreCuenta(mov.cuentaId);
-  const colorCuenta  = getColorCuenta(mov.cuentaId);
+  const esIngreso      = mov.tipo === 'ingreso';
+  const esTransferencia = mov.tipo === 'transferencia';
+  const nombreCuenta   = getNombreCuenta(mov.cuentaId);
+  const colorCuenta    = getColorCuenta(mov.cuentaId);
+
+  // Definir badge y color de monto según tipo
+  let badgeHtml, montoHtml;
+
+  if (esTransferencia) {
+    const esSalida = mov.subTipo === 'salida';
+    badgeHtml = `<span class="type-badge badge-transferencia">⇄ ${esSalida ? 'Salida' : 'Entrada'}</span>`;
+    montoHtml = `<span class="${esSalida ? 'amount-gasto' : 'amount-ingreso'}">
+      ${esSalida ? '→' : '←'} ${formatMoney(mov.monto)}
+    </span>`;
+  } else if (esIngreso) {
+    badgeHtml = `<span class="type-badge badge-ingreso">↑ Ingreso</span>`;
+    montoHtml = `<span class="amount-ingreso">+ ${formatMoney(mov.monto)}</span>`;
+  } else {
+    badgeHtml = `<span class="type-badge badge-gasto">↓ Gasto</span>`;
+    montoHtml = `<span class="amount-gasto">− ${formatMoney(mov.monto)}</span>`;
+  }
 
   return `
-    <tr>
+    <tr ${esTransferencia ? 'class="row-transferencia"' : ''}>
       <td>${formatDate(mov.fecha)}</td>
-      <td>${escapeHtml(mov.descripcion)}</td>
+      <td>
+        ${escapeHtml(mov.descripcion)}
+        ${esTransferencia && mov.vinculoId ? '<span class="transfer-link-icon" title="Transferencia vinculada">🔗</span>' : ''}
+      </td>
       <td>${escapeHtml(mov.categoria || '—')}</td>
       <td>
         ${nombreCuenta !== '—'
@@ -631,14 +719,8 @@ function renderFilaMovimiento(mov) {
           : '<span class="text-muted">—</span>'
         }
       </td>
-      <td>
-        <span class="type-badge ${esIngreso ? 'badge-ingreso' : 'badge-gasto'}">
-          ${esIngreso ? '↑ Ingreso' : '↓ Gasto'}
-        </span>
-      </td>
-      <td class="text-right ${esIngreso ? 'amount-ingreso' : 'amount-gasto'}">
-        ${esIngreso ? '+' : '−'} ${formatMoney(mov.monto)}
-      </td>
+      <td>${badgeHtml}</td>
+      <td class="text-right">${montoHtml}</td>
       <td class="text-center">
         <div class="action-btns">
           <button class="action-btn" onclick="editarMovimiento('${mov.id}')" title="Editar">✎</button>
@@ -714,6 +796,10 @@ function renderResumen() {
   let cntGastos     = 0;
 
   filtrados.forEach(m => {
+    // Las transferencias se EXCLUYEN del cálculo de totales.
+    // Solo se cuentan ingresos y gastos reales.
+    if (m.tipo === 'transferencia') return;
+
     if (m.tipo === 'ingreso') {
       totalIngresos += m.monto;
       cntIngresos++;
@@ -1115,7 +1201,8 @@ function exportarPDF() {
   let totalIngresos = 0, totalGastos = 0;
   App.movimientos.forEach(m => {
     if (m.tipo === 'ingreso') totalIngresos += m.monto;
-    else totalGastos += m.monto;
+    else if (m.tipo === 'gasto') totalGastos += m.monto;
+    // transferencias excluidas intencionalmente
   });
   const balance = totalIngresos - totalGastos;
 
@@ -1176,14 +1263,16 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-/** Calcula el resumen de ingresos/gastos agrupado por cuenta */
+/** Calcula el resumen de ingresos/gastos agrupado por cuenta.
+ *  Las transferencias se muestran como columna separada, no como ingreso/gasto. */
 function calcularResumenCuentas() {
   const map = {};
   App.movimientos.forEach(m => {
     const key = m.cuentaId || '__sin_cuenta__';
-    if (!map[key]) map[key] = { ingresos: 0, gastos: 0 };
-    if (m.tipo === 'ingreso') map[key].ingresos += m.monto;
-    else map[key].gastos += m.monto;
+    if (!map[key]) map[key] = { ingresos: 0, gastos: 0, transferencias: 0 };
+    if (m.tipo === 'ingreso')      map[key].ingresos += m.monto;
+    else if (m.tipo === 'gasto')   map[key].gastos   += m.monto;
+    else if (m.tipo === 'transferencia') map[key].transferencias += m.monto;
   });
   return map;
 }
