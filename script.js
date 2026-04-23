@@ -45,24 +45,23 @@ const App = {
 const CATEGORIAS = {
   ingreso: [
     'Nómina / Salario',
-    'Transferencias / Honorarios',
+    'Freelance / Honorarios',
     'Inversiones',
-    'Ahorros',
-    'Ahorro compartido',
+    'Renta',
+    'Bonos',
     'Otros ingresos'
   ],
   gasto: [
     'Alimentación',
-    'Gasolina / combustible',
+    'Transporte',
     'Hogar / Servicios',
-    'Otras compras',
-    'Pago de tarjeta',
-    'Diezmo / Donaciones',
-    'Recargas',
-    'Retiro de paquetes',
-    'Deudas pagadas',
+    'Salud',
+    'Educación',
+    'Entretenimiento',
+    'Ropa',
+    'Tecnología',
+    'Seguros',
     'Suscripciones',
-    'Aporte a familia',
     'Otros gastos'
   ],
   // Las transferencias entre cuentas propias NO son ingreso ni gasto.
@@ -351,6 +350,12 @@ function cargarCuentasEnSelects() {
   const movCuenta = document.getElementById('movCuenta');
   if (movCuenta) {
     movCuenta.innerHTML = `<option value="">Sin especificar</option>${opciones}`;
+  }
+
+  // Select de cuenta destino en transferencias
+  const movCuentaDestino = document.getElementById('movCuentaDestino');
+  if (movCuentaDestino) {
+    movCuentaDestino.innerHTML = `<option value="">Seleccionar destino</option>${opciones}`;
   }
 
   // Selects de filtros
@@ -1325,7 +1330,6 @@ document.addEventListener('DOMContentLoaded', () => {
     cuentas: App.cuentas.length,
     patrones: App.patrones.length
   });
-
 });
 
 /* ═══════════════════════════════════════════════════════════════
