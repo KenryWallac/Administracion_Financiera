@@ -45,23 +45,24 @@ const App = {
 const CATEGORIAS = {
   ingreso: [
     'Nómina / Salario',
-    'Freelance / Honorarios',
+    'Transferencias / Honorarios',
     'Inversiones',
-    'Renta',
-    'Bonos',
+    'Ahorros',
+    'Ahorro compartido',
     'Otros ingresos'
   ],
   gasto: [
     'Alimentación',
-    'Transporte',
+    'Gasolina / combustible',
     'Hogar / Servicios',
-    'Salud',
-    'Educación',
-    'Entretenimiento',
-    'Ropa',
-    'Tecnología',
-    'Seguros',
+    'Otras compras',
+    'Pago de tarjeta',
+    'Diezmo / Donaciones',
+    'Recargas',
+    'Retiro de paquetes',
+    'Deudas pagadas',
     'Suscripciones',
+    'Aporte a familia',
     'Otros gastos'
   ],
   // Las transferencias entre cuentas propias NO son ingreso ni gasto.
