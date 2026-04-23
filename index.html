@@ -19,6 +19,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
 
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -57,7 +58,8 @@
     </nav>
  
     <div class="sidebar-footer">
-      <span class="version-tag">v1.0.0</span>
+      <!--<span class="version-tag">v1.0.0</span>-->
+      <span id="app-version">v...</span>
     </div>
   </aside>
  
@@ -301,8 +303,8 @@
             id="emailText"
             class="email-textarea"
             placeholder="Pega aquí el contenido de un correo de notificación bancaria...
-Ejemplo:
-  Estimado cliente, se realizó un cargo de $1,250.00 en su cuenta el 15/01/2025."
+            Ejemplo:
+            Estimado cliente, se realizó un cargo de $1,250.00 en su cuenta el 15/01/2025."
             rows="6"
           ></textarea>
           <div class="btn-row">
@@ -490,6 +492,7 @@ Ejemplo:
               <option value="banco">Banco</option>
               <option value="tarjeta">Tarjeta de Crédito</option>
               <option value="ahorro">Cuenta de Ahorro</option>
+              <option value="corriente">Cuenta Corriente</option>
               <option value="efectivo">Efectivo</option>
               <option value="otro">Otro</option>
             </select>
@@ -578,7 +581,8 @@ Ejemplo:
  
   <!-- Toast de notificaciones -->
   <div class="toast-container" id="toastContainer"></div>
- 
+
+  <script type="module" src="Version.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

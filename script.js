@@ -12,6 +12,11 @@
    - cuentas[]      → array de referentes bancarios
    - patrones[]     → array de patrones de detección de correo
 ═══════════════════════════════════════════════════════════════ */
+import { getVersion } from './version.js';
+  document.addEventListener('DOMContentLoaded', async () => {
+  const version = await getVersion();
+  document.getElementById('app-version').textContent = `v${version}`;
+});
 
 'use strict';
 
@@ -1325,6 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cuentas: App.cuentas.length,
     patrones: App.patrones.length
   });
+
 });
 
 /* ═══════════════════════════════════════════════════════════════
