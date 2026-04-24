@@ -138,10 +138,25 @@ body {
   margin-bottom: var(--sp-md);
 }
 
-.logo-icon {
+.logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 12px;
+  padding: 6px;
+
+  background: linear-gradient(145deg, rgba(0,255,150,0.1), rgba(0,100,255,0.1));
+  box-shadow: 0 0 8px rgba(0, 255, 150, 0.2);
+}
+.logo:hover {
+    opacity: 1;
+    transform: scale(1.1); /* pequeño zoom */
+}
+
+/*.logo-icon {
   font-size: 1.4rem;
   color: var(--accent);
-}
+}*/
 
 .logo-text {
   font-family: var(--font-display);
@@ -198,9 +213,15 @@ body {
   flex-shrink: 0;
 }
 
+/* Contenedor del footer del sidebar */
 .sidebar-footer {
-  padding: var(--sp-md) var(--sp-lg);
-  border-top: 1px solid var(--border);
+    position: absolute;
+    bottom: 15px; /* Pegado abajo */
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* Elementos en vertical */
+    align-items: center;
+    gap: 8px; /* Espacio entre logo y versión */
 }
 
 .version-tag {
